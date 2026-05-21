@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>PREMIUM COIN</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0e0e13;
+  --surface:#16161f;
+  --surface2:#1c1c28;
+  --border:rgba(255,255,255,0.07);
+  --gold:#f5c842;
+  --gold2:#e8a020;
+  --orange:#ff6b35;
+  --green:#22c55e;
+  --text:#f0f0f5;
+  --muted:rgba(240,240,245,0.4);
+  --accent:#6c63ff;
+}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter',sans-serif;
+  height:100dvh;
+  overflow:hidden;
+  position:relative;
+}
+
+/* ---- NOISE OVERLAY ---- */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;opacity:0.6;
+}
+
+/* ---- BG GRADIENT ---- */
+.bg-blob{
+  position:fixed;pointer-events:none;border-radius:50%;filter:blur(90px);z-index:0;
+}
+.blob1{width:400px;height:400px;background:radial-gradient(circle,rgba(108,99,255,0.12),transparent 70%);top:-120px;left:-80px;animation:blobmove 12s ease-in-out infinite alternate;}
+.blob2{width:350px;height:350px;background:radial-gradient(circle,rgba(245,200,66,0.08),transparent 70%);bottom:-80px;right:-60px;animation:blobmove 9s ease-in-out infinite alternate-reverse;}
+@keyframes blobmove{to{transform:translate(40px,60px)}}
+
+/* ---- SCROLL CONTAINER ---- */
+.scroll{
+  position:fixed;top:64px;bottom:76px;left:0;right:0;
+  overflow-y:auto;z-index:1;
+  scrollbar-width:none;
+}
+.scroll::-webkit-scrollbar{display:none}
+
+.page{display:none;padding:16px 14px 24px;}
+.page.active{display:block;animation:pgIn .25s ease;}
+@keyframes pgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ---- TOP BAR ---- */
+.topbar{
+  position:fixed;top:0;left:0;right:0;height:64px;
+  background:rgba(14,14,19,0.85);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;z-index:100;
+}
+.topbar-logo{font-size:15px;font-weight:800;letter-spacing:.5px;color:var(--text);}
+.topbar-logo span{color:var(--gold);}
+.bal-chip{
+  display:flex;align-items:center;gap:7px;
+  background:rgba(245,200,66,0.1);
+  border:1px solid rgba(245,200,66,0.2);
+  border-radius:999px;padding:7px 14px;
+}
+.bal-chip .ic{font-size:17px;}
+.bal-chip .num{font-size:15px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;}
+
+/* ---- RANK STRIP ---- */
+.rank-strip{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:18px 18px 16px;
+  margin-bottom:12px;
+}
+.rank-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.rank-badge{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(245,200,66,0.1);
+  border:1px solid rgba(245,200,66,0.2);
+  border-radius:10px;padding:6px 12px;
+}
+.rank-badge span{font-size:13px;font-weight:700;color:var(--gold);letter-spacing:.5px;}
+.rank-next{font-size:13px;color:var(--muted);}
+.rank-next b{color:var(--text);}
+.pbar-bg{height:8px;background:rgba(255,255,255,0.06);border-radius:999px;overflow:hidden;}
+.pbar-fill{height:100%;background:linear-gradient(90deg,var(--gold2),var(--gold));border-radius:999px;transition:width .4s cubic-bezier(.4,0,.2,1);box-shadow:0 0 10px rgba(245,200,66,.4);}
+
+/* ---- COIN SECTION ---- */
+.coin-section{
+  display:flex;flex-direction:column;align-items:center;
+  padding:24px 0 20px;position:relative;
+}
+
+/* character — 3D layered hexagon creature */
+.char-wrap{
+  position:relative;
+  width:200px;height:200px;
+  cursor:pointer;
+  user-select:none;
+  -webkit-user-select:none;
+}
+.char-wrap:active{transform:scale(.94);}
+.char-wrap{transition:transform .12s cubic-bezier(.4,0,.2,1);}
+
+.char-shadow{
+  position:absolute;
+  bottom:-10px;left:50%;transform:translateX(-50%);
+  width:140px;height:22px;
+  background:radial-gradient(ellipse,rgba(108,99,255,.35),transparent 70%);
+  border-radius:50%;
+  animation:shadowpulse 2s ease-in-out infinite;
+}
+@keyframes shadowpulse{0%,100%{transform:translateX(-50%) scaleX(1);opacity:.7}50%{transform:translateX(-50%) scaleX(.85);opacity:.4}}
+
+.char-body{
+  width:200px;height:200px;
+  position:relative;
+  animation:float 3s ease-in-out infinite;
+}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+/* SVG character */
+.char-svg{width:200px;height:200px;}
+
+.tap-ring{
+  position:absolute;inset:-12px;
+  border-radius:50%;
+  border:2px solid rgba(245,200,66,.15);
+  animation:ringgrow 2.5s ease-in-out infinite;
+}
+.tap-ring2{
+  position:absolute;inset:-24px;
+  border-radius:50%;
+  border:1px solid rgba(108,99,255,.1);
+  animation:ringgrow 2.5s ease-in-out .5s infinite;
+}
+@keyframes ringgrow{0%{transform:scale(.9);opacity:0}50%{opacity:1}100%{transform:scale(1.1);opacity:0}}
+
+.per-tap{
+  margin-top:18px;
+  display:flex;align-items:center;gap:6px;
+  font-size:13px;font-weight:600;color:var(--muted);
+  letter-spacing:.3px;
+}
+.per-tap .pval{color:var(--gold);font-weight:800;}
+
+/* ---- ENERGY BAR ---- */
+.energy-row{
+  width:100%;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:14px 16px;
+  margin-bottom:12px;
+  display:flex;align-items:center;gap:12px;
+}
+.energy-icon{font-size:22px;flex-shrink:0;}
+.energy-mid{flex:1;}
+.energy-label{display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-bottom:7px;}
+.energy-label .el{color:var(--muted);}
+.energy-label .ev{color:var(--text);}
+.ebar-bg{height:7px;background:rgba(255,255,255,0.07);border-radius:999px;overflow:hidden;}
+.ebar-fill{height:100%;background:linear-gradient(90deg,#22c55e,#4ade80);border-radius:999px;transition:width .4s ease;box-shadow:0 0 8px rgba(34,197,94,.4);}
+
+/* ---- STAT ROW ---- */
+.stat-row{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+  margin-bottom:12px;
+}
+.stat-box{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:12px 10px;
+  text-align:center;
+}
+.stat-box .sv{font-size:17px;font-weight:800;color:var(--text);margin-bottom:2px;font-variant-numeric:tabular-nums;}
+.stat-box .sl{font-size:11px;color:var(--muted);font-weight:500;letter-spacing:.3px;}
+
+/* ---- SECTION LABEL ---- */
+.sec-label{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin:4px 0 10px;}
+
+/* ---- BOOST ---- */
+.boost-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.boost-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:16px 14px;
+  transition:border-color .2s,transform .15s;
+  cursor:pointer;
+}
+.boost-card:hover{border-color:rgba(245,200,66,.25);transform:translateY(-2px);}
+.boost-card:active{transform:scale(.97);}
+.bc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.bc-lvl{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.5px;background:rgba(108,99,255,.12);border-radius:6px;padding:3px 8px;}
+.bc-icon{font-size:22px;}
+.bc-power{font-size:26px;font-weight:900;color:var(--gold);margin-bottom:2px;}
+.bc-sub{font-size:12px;color:var(--muted);margin-bottom:12px;}
+.bc-btn{
+  width:100%;padding:10px;
+  background:rgba(245,200,66,.1);
+  border:1px solid rgba(245,200,66,.25);
+  border-radius:10px;
+  color:var(--gold);font-size:12px;font-weight:700;
+  cursor:pointer;transition:background .2s;
+  font-family:'Inter',sans-serif;
+}
+.bc-btn:hover{background:rgba(245,200,66,.18);}
+
+.limit-row{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:16px;
+  margin-bottom:8px;
+  display:flex;align-items:center;gap:14px;
+  transition:border-color .2s;
+}
+.limit-row:hover{border-color:rgba(34,197,94,.2);}
+.lr-icon{width:44px;height:44px;border-radius:12px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.lr-info{flex:1;}
+.lr-name{font-size:15px;font-weight:700;margin-bottom:2px;}
+.lr-desc{font-size:12px;color:var(--muted);}
+.lr-btn{
+  padding:10px 16px;
+  background:rgba(34,197,94,.1);
+  border:1px solid rgba(34,197,94,.3);
+  border-radius:10px;
+  color:var(--green);font-size:12px;font-weight:700;
+  cursor:pointer;font-family:'Inter',sans-serif;
+  white-space:nowrap;transition:background .2s;
+}
+.lr-btn:hover{background:rgba(34,197,94,.18);}
+
+/* ---- FRIENDS ---- */
+.bonus-row{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:16px;
+  display:flex;align-items:center;gap:14px;
+  margin-bottom:8px;
+}
+.br-icon{font-size:32px;}
+.br-info{flex:1;}
+.br-title{font-size:15px;font-weight:700;margin-bottom:2px;}
+.br-sub{font-size:13px;color:var(--muted);}
+.br-val{font-size:16px;font-weight:800;color:var(--gold);}
+
+.ref-wrap{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:16px;
+  margin-top:14px;
+}
+.ref-url{
+  font-size:13px;color:var(--accent);
+  word-break:break-all;
+  background:rgba(108,99,255,.08);
+  border:1px solid rgba(108,99,255,.15);
+  border-radius:10px;padding:12px;
+  margin-bottom:12px;font-family:monospace;
+}
+.btn-main{
+  width:100%;padding:14px;
+  background:linear-gradient(135deg,var(--gold2),var(--gold));
+  border:none;border-radius:12px;
+  color:#1a0a00;font-size:14px;font-weight:800;
+  cursor:pointer;font-family:'Inter',sans-serif;
+  letter-spacing:.3px;transition:opacity .2s,transform .1s;
+  box-shadow:0 4px 20px rgba(245,200,66,.25);
+}
+.btn-main:hover{opacity:.9;}
+.btn-main:active{transform:scale(.97);}
+
+/* ---- WITHDRAW ---- */
+.plan{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:18px;
+  margin-bottom:10px;
+  transition:border-color .2s;
+}
+.plan:hover{border-color:rgba(108,99,255,.25);}
+.plan-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.plan-tag{font-size:11px;font-weight:700;letter-spacing:1px;padding:4px 10px;border-radius:999px;background:rgba(108,99,255,.12);color:var(--accent);border:1px solid rgba(108,99,255,.2);}
+.plan-tag.hot{background:rgba(255,107,53,.12);color:var(--orange);border-color:rgba(255,107,53,.25);}
+.plan-price{font-size:24px;font-weight:900;color:var(--gold);}
+.plan-desc{font-size:13px;color:var(--muted);margin-bottom:14px;}
+
+.inp{
+  width:100%;padding:13px 15px;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:12px;color:var(--text);
+  font-size:15px;font-family:'Inter',sans-serif;
+  outline:none;transition:border-color .2s;
+  margin-bottom:14px;
+}
+.inp:focus{border-color:rgba(108,99,255,.4);}
+::placeholder{color:var(--muted);}
+
+/* ---- TOP ---- */
+.top-item{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:14px 16px;
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:8px;
+  transition:border-color .2s;
+}
+.top-item.me{border-color:rgba(245,200,66,.3);}
+.top-num{font-size:15px;font-weight:800;min-width:28px;text-align:center;}
+.top-num.g1{color:#ffd700;}.top-num.g2{color:#c0c0c0;}.top-num.g3{color:#cd7f32;}
+.top-av{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#9c63ff);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;flex-shrink:0;}
+.top-name{flex:1;font-size:15px;font-weight:600;}
+.top-coin{font-size:14px;font-weight:700;color:var(--gold);}
+
+/* ---- SETTINGS ---- */
+.set-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:18px;margin-bottom:12px;}
+.set-title{font-size:14px;font-weight:700;margin-bottom:14px;color:var(--text);}
+.set-field{margin-bottom:10px;}
+.set-field label{font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;letter-spacing:.3px;}
+.stats2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+.st2b{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;}
+.st2b .v{font-size:20px;font-weight:800;margin-bottom:3px;}
+.st2b .l{font-size:11px;color:var(--muted);font-weight:500;}
+.btn-danger{
+  width:100%;padding:13px;
+  background:rgba(239,68,68,.08);
+  border:1px solid rgba(239,68,68,.2);
+  border-radius:12px;
+  color:#f87171;font-size:13px;font-weight:700;
+  cursor:pointer;font-family:'Inter',sans-serif;
+  margin-top:4px;transition:background .2s;
+}
+.btn-danger:hover{background:rgba(239,68,68,.14);}
+
+/* ---- NAV ---- */
+.nav{
+  position:fixed;bottom:0;left:0;right:0;height:76px;
+  background:rgba(14,14,19,0.92);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-around;
+  padding:0 8px 6px;z-index:100;
+}
+.nb{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:8px 10px;border-radius:14px;
+  color:var(--muted);cursor:pointer;
+  transition:all .2s;min-width:50px;
+}
+.nb.active{color:var(--gold);background:rgba(245,200,66,.08);}
+.nb .ni{font-size:21px;transition:transform .2s;}
+.nb.active .ni{transform:scale(1.1);}
+.nb .nl{font-size:10px;font-weight:700;letter-spacing:.3px;}
+
+/* ---- PLUS FLOAT ---- */
+.plus{
+  position:fixed;
+  font-size:24px;font-weight:800;
+  color:var(--gold);
+  pointer-events:none;z-index:9999;
+  text-shadow:0 0 12px rgba(245,200,66,.6);
+  animation:floatup .9s ease-out forwards;
+}
+@keyframes floatup{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-80px) scale(.7)}}
+
+/* ---- TOAST ---- */
+.toast{
+  position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:12px;padding:11px 22px;
+  font-size:14px;font-weight:600;
+  z-index:9999;opacity:0;transition:opacity .25s;
+  pointer-events:none;white-space:nowrap;
+  box-shadow:0 8px 32px rgba(0,0,0,.4);
+}
+.toast.show{opacity:1;}
+
+/* ---- CLICK RIPPLE ---- */
+.ripple{
+  position:fixed;border-radius:50%;
+  background:rgba(245,200,66,.25);
+  pointer-events:none;z-index:9998;
+  animation:ripout .5s ease-out forwards;
+}
+@keyframes ripout{0%{width:0;height:0;opacity:1;margin:-0px}100%{width:100px;height:100px;opacity:0;margin:-50px}}
+</style>
+</head>
+<body>
+
+<div class="bg-blob blob1"></div>
+<div class="bg-blob blob2"></div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-logo">PREMIUM<span>COIN</span></div>
+  <div class="bal-chip">
+    <span class="ic">🪙</span>
+    <span class="num" id="balance">0</span>
+  </div>
+</div>
+
+<!-- SCROLL -->
+<div class="scroll">
+
+  <!-- MINE -->
+  <div class="page active" id="minePage">
+
+    <div class="rank-strip">
+      <div class="rank-row">
+        <div class="rank-badge"><span id="rank">BEGINNER</span></div>
+        <div class="rank-next">Keyingi: <b id="rankNext">1,000</b> 🪙</div>
+      </div>
+      <div class="pbar-bg"><div class="pbar-fill" id="progress" style="width:0%"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:7px;">
+        <span style="font-size:12px;color:var(--muted)" id="progText">0 / 1,000</span>
+        <span style="font-size:12px;color:var(--muted)" id="progPct">0%</span>
+      </div>
+    </div>
+
+    <div class="coin-section">
+      <div class="tap-ring"></div>
+      <div class="tap-ring2"></div>
+      <div class="char-wrap" onclick="mine(event)" id="coinBtn">
+        <div class="char-shadow"></div>
+        <div class="char-body">
+          <!-- CUSTOM CHARACTER: futuristic robot/alien coin creature -->
+          <svg class="char-svg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="bodyGrad" cx="45%" cy="35%">
+                <stop offset="0%" stop-color="#7c6fff"/>
+                <stop offset="60%" stop-color="#4c3fd4"/>
+                <stop offset="100%" stop-color="#1e1560"/>
+              </radialGradient>
+              <radialGradient id="faceGrad" cx="40%" cy="30%">
+                <stop offset="0%" stop-color="#3d3880"/>
+                <stop offset="100%" stop-color="#1a1650"/>
+              </radialGradient>
+              <radialGradient id="eyeL" cx="40%" cy="30%">
+                <stop offset="0%" stop-color="#00f5ff"/>
+                <stop offset="100%" stop-color="#0080c0"/>
+              </radialGradient>
+              <radialGradient id="eyeR" cx="40%" cy="30%">
+                <stop offset="0%" stop-color="#ff6b35"/>
+                <stop offset="100%" stop-color="#c03000"/>
+              </radialGradient>
+              <radialGradient id="coreGrad" cx="40%" cy="30%">
+                <stop offset="0%" stop-color="#ffd700"/>
+                <stop offset="50%" stop-color="#f5a020"/>
+                <stop offset="100%" stop-color="#c06000"/>
+              </radialGradient>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="3" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+              <filter id="softglow">
+                <feGaussianBlur stdDeviation="6" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+
+            <!-- outer aura -->
+            <circle cx="100" cy="105" r="78" fill="rgba(108,99,255,0.08)"/>
+
+            <!-- BODY - hexagonal torso -->
+            <path d="M100 32 L142 56 L142 104 L100 128 L58 104 L58 56 Z" fill="url(#bodyGrad)" stroke="rgba(140,130,255,0.4)" stroke-width="1.5"/>
+            <!-- body sheen -->
+            <path d="M100 36 L138 58 L138 72 L100 50 L62 72 L62 58 Z" fill="rgba(255,255,255,0.07)"/>
+            <!-- body edge highlight -->
+            <path d="M100 32 L142 56" stroke="rgba(200,190,255,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M100 32 L58 56" stroke="rgba(200,190,255,0.25)" stroke-width="1" stroke-linecap="round"/>
+
+            <!-- FACE PLATE -->
+            <ellipse cx="100" cy="80" rx="30" ry="28" fill="url(#faceGrad)" stroke="rgba(140,130,255,0.3)" stroke-width="1"/>
+            <!-- face sheen -->
+            <ellipse cx="93" cy="70" rx="10" ry="7" fill="rgba(255,255,255,0.06)" transform="rotate(-15,93,70)"/>
+
+            <!-- EYES -->
+            <!-- left eye socket -->
+            <ellipse cx="88" cy="78" rx="9" ry="8" fill="rgba(0,0,0,0.5)"/>
+            <!-- left eye glow -->
+            <ellipse cx="88" cy="78" rx="7" ry="6.5" fill="url(#eyeL)" filter="url(#glow)"/>
+            <ellipse cx="86" cy="76" rx="2.5" ry="2" fill="rgba(255,255,255,0.7)"/>
+
+            <!-- right eye socket -->
+            <ellipse cx="112" cy="78" rx="9" ry="8" fill="rgba(0,0,0,0.5)"/>
+            <!-- right eye -->
+            <ellipse cx="112" cy="78" rx="7" ry="6.5" fill="url(#eyeR)" filter="url(#glow)"/>
+            <ellipse cx="110" cy="76" rx="2.5" ry="2" fill="rgba(255,255,255,0.7)"/>
+
+            <!-- MOUTH - thin LED line -->
+            <rect x="91" y="91" width="18" height="3" rx="1.5" fill="rgba(0,245,255,0.7)" filter="url(#glow)"/>
+            <rect x="94" y="91" width="5" height="3" rx="1.5" fill="rgba(255,255,255,0.9)"/>
+
+            <!-- ANTENNA -->
+            <line x1="100" y1="32" x2="100" y2="16" stroke="rgba(140,130,255,0.6)" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="100" cy="12" r="5" fill="#6c63ff" filter="url(#glow)"/>
+            <circle cx="100" cy="12" r="2.5" fill="#c0baff"/>
+
+            <!-- side antennas -->
+            <line x1="58" y1="56" x2="40" y2="44" stroke="rgba(140,130,255,0.4)" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="37" cy="42" r="4" fill="#4c3fd4" filter="url(#glow)"/>
+            <circle cx="37" cy="42" r="2" fill="#9c93ff"/>
+            <line x1="142" y1="56" x2="160" y2="44" stroke="rgba(140,130,255,0.4)" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="163" cy="42" r="4" fill="#4c3fd4" filter="url(#glow)"/>
+            <circle cx="163" cy="42" r="2" fill="#9c93ff"/>
+
+            <!-- COIN CORE on chest -->
+            <circle cx="100" cy="113" r="16" fill="rgba(0,0,0,0.3)"/>
+            <circle cx="100" cy="113" r="13" fill="url(#coreGrad)" filter="url(#softglow)"/>
+            <circle cx="100" cy="113" r="8" fill="rgba(255,220,80,0.9)"/>
+            <text x="100" y="117" text-anchor="middle" font-size="9" font-weight="900" fill="#7a4000" font-family="serif">₿</text>
+            <!-- coin shine -->
+            <ellipse cx="96" cy="109" rx="3" ry="2" fill="rgba(255,255,255,0.5)" transform="rotate(-30,96,109)"/>
+
+            <!-- LEGS -->
+            <rect x="84" y="128" width="12" height="22" rx="6" fill="url(#bodyGrad)" stroke="rgba(140,130,255,0.3)" stroke-width="1"/>
+            <rect x="104" y="128" width="12" height="22" rx="6" fill="url(#bodyGrad)" stroke="rgba(140,130,255,0.3)" stroke-width="1"/>
+            <!-- feet -->
+            <ellipse cx="90" cy="151" rx="9" ry="5" fill="#2a2060" stroke="rgba(140,130,255,0.3)" stroke-width="1"/>
+            <ellipse cx="110" cy="151" rx="9" ry="5" fill="#2a2060" stroke="rgba(140,130,255,0.3)" stroke-width="1"/>
+
+            <!-- ARMS -->
+            <!-- left arm -->
+            <path d="M58 68 Q38 80 34 100 Q32 114 42 118" stroke="url(#bodyGrad)" stroke-width="11" stroke-linecap="round" fill="none"/>
+            <circle cx="43" cy="120" r="8" fill="#3d3880" stroke="rgba(140,130,255,0.4)" stroke-width="1"/>
+            <!-- left hand glow (holding energy) -->
+            <circle cx="43" cy="120" r="5" fill="rgba(0,245,255,0.8)" filter="url(#glow)"/>
+
+            <!-- right arm -->
+            <path d="M142 68 Q162 80 166 100 Q168 114 158 118" stroke="url(#bodyGrad)" stroke-width="11" stroke-linecap="round" fill="none"/>
+            <circle cx="157" cy="120" r="8" fill="#3d3880" stroke="rgba(140,130,255,0.4)" stroke-width="1"/>
+            <!-- right hand glow -->
+            <circle cx="157" cy="120" r="5" fill="rgba(255,107,53,0.8)" filter="url(#glow)"/>
+
+            <!-- circuit lines on body -->
+            <path d="M78 75 L72 75 L72 95 L80 95" stroke="rgba(0,245,255,0.25)" stroke-width="1" fill="none"/>
+            <path d="M122 75 L128 75 L128 95 L120 95" stroke="rgba(255,107,53,0.25)" stroke-width="1" fill="none"/>
+            <circle cx="72" cy="75" r="2" fill="rgba(0,245,255,0.5)"/>
+            <circle cx="128" cy="75" r="2" fill="rgba(255,107,53,0.5)"/>
+          </svg>
+        </div>
+      </div>
+      <div class="per-tap">Har bosishda <span class="pval" id="powerTxt">+1 🪙</span></div>
+    </div>
+
+    <div class="energy-row">
+      <div class="energy-icon">⚡</div>
+      <div class="energy-mid">
+        <div class="energy-label">
+          <span class="el">ENERGY</span>
+          <span class="ev" id="energyTxt">1000 / 1000</span>
+        </div>
+        <div class="ebar-bg"><div class="ebar-fill" id="energyBar"></div></div>
+      </div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-box"><div class="sv" id="st-power">+1</div><div class="sl">POWER</div></div>
+      <div class="stat-box"><div class="sv" id="st-limit">1K</div><div class="sl">LIMIT</div></div>
+      <div class="stat-box"><div class="sv" id="st-taps">0</div><div class="sl">TAPS</div></div>
+    </div>
+
+  </div>
+
+  <!-- BOOST -->
+  <div class="page" id="boostPage">
+
+    <div class="sec-label">⚡ Tap kuchini oshir</div>
+    <div class="boost-grid">
+      <div class="boost-card">
+        <div class="bc-top"><span class="bc-lvl">LVL 2</span><span class="bc-icon">⚡</span></div>
+        <div class="bc-power">+2</div>
+        <div class="bc-sub">har bir bosishda</div>
+        <button class="bc-btn" onclick="buyBoost(500,2)">500 🪙</button>
+      </div>
+      <div class="boost-card">
+        <div class="bc-top"><span class="bc-lvl">LVL 3</span><span class="bc-icon">🔥</span></div>
+        <div class="bc-power">+5</div>
+        <div class="bc-sub">har bir bosishda</div>
+        <button class="bc-btn" onclick="buyBoost(1500,5)">1,500 🪙</button>
+      </div>
+      <div class="boost-card">
+        <div class="bc-top"><span class="bc-lvl">LVL 4</span><span class="bc-icon">💥</span></div>
+        <div class="bc-power">+7</div>
+        <div class="bc-sub">har bir bosishda</div>
+        <button class="bc-btn" onclick="buyBoost(3000,7)">3,000 🪙</button>
+      </div>
+      <div class="boost-card">
+        <div class="bc-top"><span class="bc-lvl">LVL 5</span><span class="bc-icon">🚀</span></div>
+        <div class="bc-power">+10</div>
+        <div class="bc-sub">har bir bosishda</div>
+        <button class="bc-btn" onclick="buyBoost(5000,10)">5,000 🪙</button>
+      </div>
+    </div>
+
+    <div class="sec-label">🔋 Energy limitini oshir</div>
+    <div class="limit-row">
+      <div class="lr-icon">🔋</div>
+      <div class="lr-info"><div class="lr-name">2,000 Limit</div><div class="lr-desc">Energy zaxirasini ikki barobarga oshir</div></div>
+      <button class="lr-btn" onclick="buyLimit(2000,15000)">15K 🪙</button>
+    </div>
+    <div class="limit-row">
+      <div class="lr-icon">⚡</div>
+      <div class="lr-info"><div class="lr-name">5,000 Limit</div><div class="lr-desc">5x katta energy sig'imi</div></div>
+      <button class="lr-btn" onclick="buyLimit(5000,30000)">30K 🪙</button>
+    </div>
+    <div class="limit-row">
+      <div class="lr-icon">🌀</div>
+      <div class="lr-info"><div class="lr-name">10,000 Limit</div><div class="lr-desc">Maksimal energy — pro daraja</div></div>
+      <button class="lr-btn" onclick="buyLimit(10000,45000)">45K 🪙</button>
+    </div>
+
+  </div>
+
+  <!-- FRIENDS -->
+  <div class="page" id="friendsPage">
+
+    <div class="sec-label">🎁 Referral bonuslar</div>
+    <div class="bonus-row">
+      <div class="br-icon">👤</div>
+      <div class="br-info">
+        <div class="br-title">Oddiy do'st</div>
+        <div class="br-sub">Har bir taklif uchun</div>
+      </div>
+      <div class="br-val">+1,000 🪙</div>
+    </div>
+    <div class="bonus-row">
+      <div class="br-icon">💎</div>
+      <div class="br-info">
+        <div class="br-title">Premium do'st</div>
+        <div class="br-sub">Telegramda Premium bo'lsa</div>
+      </div>
+      <div class="br-val">+5,000 🪙</div>
+    </div>
+
+    <div class="ref-wrap">
+      <div class="sec-label" style="margin-bottom:8px">Sizning havolangiz</div>
+      <div class="ref-url" id="refLink">https://premiumcoin.app/ref/abc123</div>
+      <button class="btn-main" onclick="copyRef()">📋 Havolani nusxalash</button>
+    </div>
+
+  </div>
+
+  <!-- WITHDRAW -->
+  <div class="page" id="withdrawPage">
+
+    <div class="sec-label">👤 Telegram username</div>
+    <input class="inp" type="text" id="tgUser" placeholder="@username kiriting">
+
+    <div class="sec-label">💎 Premium paketlar</div>
+
+    <div class="plan">
+      <div class="plan-head">
+        <span class="plan-tag">1 OY</span>
+        <span class="plan-price">40,000 🪙</span>
+      </div>
+      <div class="plan-desc">1 oylik Telegram Premium obunasi</div>
+      <button class="btn-main" onclick="withdraw(40000,'1 oylik Premium')">Olish</button>
+    </div>
+
+    <div class="plan">
+      <div class="plan-head">
+        <span class="plan-tag hot">🔥 OMMABOP</span>
+        <span class="plan-price">100,000 🪙</span>
+      </div>
+      <div class="plan-desc">3 oylik Telegram Premium — tejamkor tanlov</div>
+      <button class="btn-main" onclick="withdraw(100000,'3 oylik Premium')">Olish</button>
+    </div>
+
+    <div class="plan">
+      <div class="plan-head">
+        <span class="plan-tag">1 YIL</span>
+        <span class="plan-price">160,000 🪙</span>
+      </div>
+      <div class="plan-desc">Yillik Premium — eng arzon variant</div>
+      <button class="btn-main" onclick="withdraw(160000,'Yillik Premium')">Olish</button>
+    </div>
+
+  </div>
+
+  <!-- TOP -->
+  <div class="page" id="topPage">
+    <div class="sec-label">🏆 Top 10 o'yinchilar</div>
+    <div id="topList"></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="page" id="settingsPage">
+
+    <div class="set-card">
+      <div class="set-title">👤 Profil</div>
+      <div class="set-field">
+        <label>Nickname</label>
+        <input class="inp" type="text" id="nickname" placeholder="Ismingizni kiriting" style="margin-bottom:10px;">
+      </div>
+      <button class="btn-main" onclick="saveName()">Saqlash</button>
+    </div>
+
+    <div class="set-card">
+      <div class="set-title">📊 Statistika</div>
+      <div class="stats2">
+        <div class="st2b"><div class="v" id="sbal" style="color:var(--gold)">0</div><div class="l">JAMI COIN</div></div>
+        <div class="st2b"><div class="v" id="staps" style="color:var(--accent)">0</div><div class="l">TAPLAR</div></div>
+        <div class="st2b"><div class="v" id="spow" style="color:var(--orange)">+1</div><div class="l">POWER</div></div>
+        <div class="st2b"><div class="v" id="slim" style="color:var(--green)">1K</div><div class="l">LIMIT</div></div>
+      </div>
+    </div>
+
+    <div class="set-card">
+      <div class="set-title">⚠️ Xavfli zona</div>
+      <button class="btn-danger" onclick="resetGame()">🗑 Barcha ma'lumotlarni o'chirish</button>
+    </div>
+
+  </div>
+
+</div><!-- /scroll -->
+
+<!-- NAV -->
+<div class="nav">
+  <div class="nb active" onclick="showPage('minePage',this)">
+    <div class="ni">⛏️</div><div class="nl">MINE</div>
+  </div>
+  <div class="nb" onclick="showPage('boostPage',this)">
+    <div class="ni">🚀</div><div class="nl">BOOST</div>
+  </div>
+  <div class="nb" onclick="showPage('friendsPage',this)">
+    <div class="ni">👥</div><div class="nl">FRIENDS</div>
+  </div>
+  <div class="nb" onclick="showPage('withdrawPage',this)">
+    <div class="ni">💎</div><div class="nl">YECHISH</div>
+  </div>
+  <div class="nb" onclick="showPage('topPage',this)">
+    <div class="ni">🏆</div><div class="nl">TOP</div>
+  </div>
+  <div class="nb" onclick="showPage('settingsPage',this)">
+    <div class="ni">⚙️</div><div class="nl">SETTINGS</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* DATA */
+let balance   = +localStorage.getItem("b")||0;
+let power     = +localStorage.getItem("pw")||1;
+let maxEnergy = +localStorage.getItem("me")||1000;
+let energy    = +localStorage.getItem("e")||maxEnergy;
+let taps      = +localStorage.getItem("t")||0;
+let players   = JSON.parse(localStorage.getItem("pl"))||[];
+
+const RANKS=[
+  {min:40000,name:"PREMIUM",next:Infinity},
+  {min:15000,name:"MASTER",next:40000},
+  {min:5000, name:"UDAR",  next:15000},
+  {min:1000, name:"PRO",   next:5000},
+  {min:0,    name:"BEGINNER",next:1000}
+];
+function getRank(b){return RANKS.find(r=>b>=r.min)||RANKS[4];}
+function fmt(n){
+  if(n>=1000000)return(n/1000000).toFixed(1)+'M';
+  if(n>=1000)return(n/1000).toFixed(n%1000===0?0:1)+'K';
+  return ''+n;
+}
+
+function updateUI(){
+  const r=getRank(balance);
+  const goal=r.next===Infinity?balance:r.next;
+  const pct=r.next===Infinity?100:Math.min(100,Math.round(balance/goal*100));
+
+  document.getElementById("balance").textContent=fmt(balance);
+  document.getElementById("rank").textContent=r.name;
+  document.getElementById("rankNext").textContent=r.next===Infinity?"MAX":fmt(r.next);
+  document.getElementById("progress").style.width=pct+"%";
+  document.getElementById("progText").textContent=fmt(balance)+" / "+(r.next===Infinity?"MAX":fmt(r.next));
+  document.getElementById("progPct").textContent=pct+"%";
+
+  const ep=Math.round(energy/maxEnergy*100);
+  document.getElementById("energyTxt").textContent=fmt(energy)+" / "+fmt(maxEnergy);
+  document.getElementById("energyBar").style.width=ep+"%";
+
+  document.getElementById("powerTxt").textContent="+"+power+" 🪙";
+  document.getElementById("st-power").textContent="+"+power;
+  document.getElementById("st-limit").textContent=fmt(maxEnergy);
+  document.getElementById("st-taps").textContent=fmt(taps);
+  document.getElementById("sbal").textContent=fmt(balance);
+  document.getElementById("staps").textContent=fmt(taps);
+  document.getElementById("spow").textContent="+"+power;
+  document.getElementById("slim").textContent=fmt(maxEnergy);
+
+  save(); savePlayer(); loadTop();
+}
+
+function save(){
+  localStorage.setItem("b",balance);
+  localStorage.setItem("pw",power);
+  localStorage.setItem("me",maxEnergy);
+  localStorage.setItem("e",energy);
+  localStorage.setItem("t",taps);
+}
+
+function mine(ev){
+  if(energy<power){toast("⚡ Energy tugadi! Kuting...");return;}
+  energy-=power; balance+=power; taps++;
+  updateUI();
+
+  // float +N
+  const el=document.createElement("div");
+  el.className="plus";
+  el.textContent="+"+power;
+  el.style.cssText=`left:${ev.clientX-12}px;top:${ev.clientY-20}px`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),900);
+
+  // ripple
+  const rp=document.createElement("div");
+  rp.className="ripple";
+  rp.style.cssText=`left:${ev.clientX}px;top:${ev.clientY}px`;
+  document.body.appendChild(rp);
+  setTimeout(()=>rp.remove(),500);
+}
+
+setInterval(()=>{if(energy<maxEnergy){energy++;updateUI();}},1000);
+
+function buyBoost(cost,p){
+  if(balance<cost){toast("❌ Coin yetmaydi!");return;}
+  balance-=cost;power=p;updateUI();
+  toast("🚀 Power +"+p+" bo'ldi!");
+}
+function buyLimit(lim,cost){
+  if(balance<cost){toast("❌ Coin yetmaydi!");return;}
+  balance-=cost;maxEnergy=lim;energy=lim;updateUI();
+  toast("🔋 Limit "+fmt(lim)+" bo'ldi!");
+}
+function withdraw(cost,plan){
+  const u=document.getElementById("tgUser").value.trim();
+  if(!u){toast("⚠️ @username kiriting!");return;}
+  if(balance<cost){toast("❌ Coin yetmaydi!");return;}
+  balance-=cost;updateUI();
+  toast("💎 "+plan+" so'rovi yuborildi!");
+}
+function showPage(id,btn){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  document.querySelectorAll(".nb").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+}
+function copyRef(){
+  navigator.clipboard.writeText(document.getElementById("refLink").innerText)
+    .then(()=>toast("✅ Havola nusxalandi!"))
+    .catch(()=>toast("❌ Nusxalab bo'lmadi"));
+}
+function saveName(){
+  const n=document.getElementById("nickname").value.trim();
+  if(!n){toast("⚠️ Ism kiriting!");return;}
+  localStorage.setItem("name",n);
+  toast("✅ "+n+" saqlandi!");
+  savePlayer();loadTop();
+}
+function resetGame(){
+  if(!confirm("Barcha ma'lumot o'chiriladi. Davom etasizmi?"))return;
+  localStorage.clear();location.reload();
+}
+function savePlayer(){
+  const name=localStorage.getItem("name")||"Player";
+  const ex=players.find(x=>x.name===name);
+  if(ex)ex.coin=balance; else players.push({name,coin:balance});
+  players.sort((a,b)=>b.coin-a.coin);
+  players=players.slice(0,10);
+  localStorage.setItem("pl",JSON.stringify(players));
+}
+function loadTop(){
+  const medals=["🥇","🥈","🥉"];
+  const gc=["g1","g2","g3"];
+  let h="";
+  const me=localStorage.getItem("name")||"Player";
+  players.forEach((p,i)=>{
+    h+=`<div class="top-item${p.name===me?' me':''}">
+      <div class="top-num ${gc[i]||''}">${medals[i]||(i+1)}</div>
+      <div class="top-av">${p.name.charAt(0).toUpperCase()}</div>
+      <div class="top-name">${p.name}</div>
+      <div class="top-coin">${fmt(p.coin)} 🪙</div>
+    </div>`;
+  });
+  if(!h)h=`<div style="text-align:center;color:var(--muted);padding:40px 0;font-size:14px;">Hali o'yinchilar yo'q</div>`;
+  document.getElementById("topList").innerHTML=h;
+}
+function toast(msg){
+  const el=document.getElementById("toast");
+  el.textContent=msg;el.classList.add("show");
+  setTimeout(()=>el.classList.remove("show"),2500);
+}
+
+const sn=localStorage.getItem("name");
+if(sn)document.getElementById("nickname").value=sn;
+updateUI();
+</script>
+</body>
+</html>
